@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Tuple, Any
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
 from google.adk.agents import Agent, LlmAgent
+import os
 
 def read_report() -> str:
     """Reads the file containing report of the product analysis.
@@ -87,9 +88,12 @@ async def create_feature_handler_agent() -> Tuple[Agent, Any]:
             command='npx',
             args=[
                 "-y",
-                "@modelcontextprotocol/server-filesystem",
-                str(Path(__file__).parent.resolve()),
+                "@modelcontextprotocol/server-slack"
             ],
+            env= {
+                "SLACK_BOT_TOKEN":  os.environ["SLACK_BOT_TOKEN"],
+                "SLACK_TEAM_ID": os.environ["SLACK_TEAM_ID"]
+            },
         )
     )
     
