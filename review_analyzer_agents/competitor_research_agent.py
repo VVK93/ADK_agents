@@ -10,8 +10,10 @@ class PlannerAgent(LlmAgent):
 
   def __init__(self):
     super().__init__(
-        model_name='gemini-pro',
-        prompt='Create a research plan for the following feature description: {feature_description}'
+        name="PlannerAgent",
+        model='gemini-pro',
+        instruction='Create a research plan for the following feature description: {feature_description}',
+        description="Agent that creates a research plan based on a feature description."
     )
 
   def create_plan(self, feature_description: str) -> str:
@@ -23,14 +25,16 @@ class ExecutorAgent(LlmAgent):
 
   def __init__(self):
     super().__init__(
-        model_name='gemini-pro',
-        prompt=(
+        name="ExecutorAgent",
+        model='gemini-pro',
+        instruction=(
             'Execute the following research plan by formulating search queries '
             'and using the perform_web_search tool to find relevant information. '
             'Compile the search results into a cohesive research summary. '
             'Research Plan: {research_plan}'
         ),
         tools=[perform_web_search],
+        description="Agent that executes a research plan using web search."
     )
 
   def execute_plan(self, research_plan: str) -> str:
@@ -48,8 +52,10 @@ class ReporterAgent(LlmAgent):
 
   def __init__(self):
     super().__init__(
-        model_name='gemini-pro',
-        prompt='Write a research report based on the following results: {research_results}'
+        name="ReporterAgent",
+        model='gemini-pro',
+        instruction='Write a research report based on the following results: {research_results}',
+        description="Agent that writes a research report based on research results."
     )
 
   def write_report(self, research_results: str) -> str:
@@ -61,8 +67,10 @@ class CriticAgent(LlmAgent):
 
   def __init__(self):
     super().__init__(
-        model_name='gemini-pro',
-        prompt='Review the following research report and provide feedback: {research_report}'
+        name="CriticAgent",
+        model='gemini-pro',
+        instruction='Review the following research report and provide feedback: {research_report}',
+        description="Agent that reviews a research report and provides feedback."
     )
 
   def critique_report(self, research_report: str) -> str:
@@ -75,8 +83,9 @@ class CompetitorResearchAgent(LlmAgent):
 
   def __init__(self):
     super().__init__(
-        model_name='gemini-pro', # Or any other suitable model
-        prompt="This agent doesn't directly use a prompt, it orchestrates sub-agents."
+        name="CompetitorResearchAgent",
+        model='gemini-pro', # Or any other suitable model
+        instruction="This agent doesn't directly use a prompt, it orchestrates sub-agents."
     )
     self.planner = PlannerAgent()
     self.executor = ExecutorAgent()
@@ -88,15 +97,11 @@ class CompetitorResearchAgent(LlmAgent):
     Orchestrates the sub-agents to perform competitor research for a given feature.
     """
     plan = self.planner.create_plan(feature_description=feature_description)
-    print(f"Plan created: {plan}")
 
     execution_results = self.executor.execute_plan(research_plan=plan)
-    print(f"Execution results: {execution_results}")
 
     report = self.reporter.write_report(research_results=execution_results)
-    print(f"Report generated: {report}")
 
     critique = self.critic.critique_report(research_report=report)
-    print(f"Critique received: {critique}")
 
     return f"Research Report:\n{report}\n\nCritique:\n{critique}"

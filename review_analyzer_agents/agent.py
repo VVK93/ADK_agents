@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Tuple, Any
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
 from google.adk.agents import Agent, LlmAgent
-import os
+import asyncio
 from .competitor_research_agent import CompetitorResearchAgent
 
 def read_report() -> str:
@@ -66,39 +66,6 @@ async def create_bug_handler_agent() -> Tuple[LlmAgent, Any]:
 
     return bug_handler_agent, exit_stack
 
-async def create_feature_handler_agent() -> Tuple[Agent, Any]:
-    """Creates and returns a feature handler agent with MCP tools.
-
-    Returns:
-        Tuple[Agent, Any]: The feature handler agent and its exit stack
-    """
-    tools, exit_stack = await MCPToolset.from_server(
-        connection_params=StdioServerParameters(
-            command='npx',
-            args=[
-                "-y",
-                "@modelcontextprotocol/server-slack"
-            ],
-            env= {
-                "SLACK_BOT_TOKEN":  os.environ["SLACK_BOT_TOKEN"],
-                "SLACK_TEAM_ID": os.environ["SLACK_TEAM_ID"]
-            },
-        )
-    )
-    
-    feature_handler_agent = Agent(
-        name="feature_handler_agent",
-        model="gemini-2.0-flash",
-        description="Agent to handle features found in product report",
-        instruction="""
-        You're the feature research manager Agent that works for Spotify.
-        Your task is to create a research plan about the feature and return it.
-        """,
-        tools=[handle_feature_request, *tools]
-    )
-
-    return feature_handler_agent, exit_stack
-
 async def create_root_agent():
     """Creates and returns the root agent with all sub-agents.
 
@@ -130,4 +97,5 @@ async def create_root_agent():
     return root_agent, bug_exit_stack
 
 # Initialize agents
-root_agent = create_root_agent()
+# Assuming create_root_agent returns a tuple: (agent, exit_stack)
+root_agent, root_exit_stack = asyncio.run(create_root_agent())
