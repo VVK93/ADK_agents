@@ -3,6 +3,7 @@ from typing import Tuple, Any
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
 from google.adk.agents import Agent, LlmAgent
 import os
+from .competitor_research_agent import CompetitorResearchAgent
 
 def read_report() -> str:
     """Reads the file containing report of the product analysis.
@@ -31,18 +32,6 @@ def handle_issue_on_github(bug_description: str) -> str:
     """
     # TODO: Implement actual GitHub API integration
     return "The new issue was successfully created! Issue Id is 1993"
-
-def handle_feature_request(feature_description: str) -> str:
-    """Creates a research plan for the new feature request.
-
-    Args:
-        feature_description (str): detailed description of the new feature request
-
-    Returns:
-        str: status string with feature research plan
-    """
-    # TODO: Implement actual feature research plan generation
-    return "The new report plan was successfully created!"
 
 async def create_bug_handler_agent() -> Tuple[LlmAgent, Any]:
     """Creates and returns a bug handler agent with MCP tools.
@@ -117,7 +106,7 @@ async def create_root_agent():
         Tuple[Agent, Any]: The root agent and its exit stack
     """
     bug_agent, bug_exit_stack = await create_bug_handler_agent()
-    feature_agent, feature_exit_stack = await create_feature_handler_agent()
+    competitor_research_agent = CompetitorResearchAgent()
     
     root_agent = Agent(
         name="report_analyzer_agent_coordinator",
@@ -129,16 +118,16 @@ async def create_root_agent():
         classified either as a bug or as a feature request.
         After classification handoff corresponding feature to a specialized agent
         for handling bugs or feature requests.
-        For Feature request - ask Agent to do a research on how to implement the feature into the product.
+        For Feature request - ask Competitor Research Agent to perform a comprehensive competitor research for the feature.
         For Bugs - ask Bug Handler Agent to create an issue on GitHub.
         """,
         tools=[read_report],
         sub_agents=[
             bug_agent,
-            feature_agent
+            competitor_research_agent
         ]
     )
-    return root_agent, (bug_exit_stack, feature_exit_stack)
+    return root_agent, bug_exit_stack
 
 # Initialize agents
 root_agent = create_root_agent()
