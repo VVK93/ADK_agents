@@ -4,8 +4,8 @@ from google.adk.tools import google_search
 from .writer_critic_agent import refinement_loop
 import os
 
-PRO_MODEL = "gemini-2.0-flash"
-FLASH_MODEL = "gemini-2.0-flash"
+PRO_MODEL = "gemini-2.5-flash-preview-05-20"
+FLASH_MODEL = "gemini-2.5-flash-preview-05-20"
 
 
 competitor_research_agent = LlmAgent(
